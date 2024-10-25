@@ -11,6 +11,7 @@ const createItem = (req, res) => {
       res.status(201).send({ data: item });
     })
     .catch((err) => {
+      console.error(err);
       res.status(500).send({ message: "Error from createItem", err });
     });
 };
@@ -19,6 +20,7 @@ const getItems = (req, res) => {
   ClothingItem.find({})
     .then((items) => res.status(200).send(items))
     .catch((err) => {
+      console.error(err);
       res.status(500).send({ message: "Error from createItem", err });
     });
 };
@@ -31,6 +33,7 @@ const updateItem = (req, res) => {
     .orFail()
     .then((item) => res.status(200).send({ data: item }))
     .catch((err) => {
+      console.error(err);
       res.status(500).send({ message: "Error from updateItem", err });
     });
 };
@@ -42,6 +45,7 @@ const deleteItem = (req, res) => {
     .orFail()
     .then((item) => res.status(204).send({}))
     .catch((err) => {
+      console.error(err);
       res.status(500).send({ message: "Error from updateItem", err });
     });
 };
