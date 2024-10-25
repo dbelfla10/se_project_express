@@ -1,4 +1,9 @@
 const ClothingItem = require("../models/clothingItem");
+const {
+  badRequest,
+  notFound,
+  internalServerError,
+} = require("../utils/errors");
 
 const createItem = (req, res) => {
   console.log(req);
@@ -12,7 +17,12 @@ const createItem = (req, res) => {
     })
     .catch((err) => {
       console.error(err);
-      res.status(500).send({ message: "Error from createItem", err });
+      if (err.name === "ValidationError") {
+        return res.status(badRequest).send({ message: err.message });
+      }
+      return res
+        .status(internalServerError)
+        .send({ message: err.message, err });
     });
 };
 
@@ -21,7 +31,7 @@ const getItems = (req, res) => {
     .then((items) => res.status(200).send(items))
     .catch((err) => {
       console.error(err);
-      res.status(500).send({ message: "Error from createItem", err });
+      res.status(internalServerError).send({ message: err.message, err });
     });
 };
 
@@ -34,7 +44,12 @@ const updateItem = (req, res) => {
     .then((item) => res.status(200).send({ data: item }))
     .catch((err) => {
       console.error(err);
-      res.status(500).send({ message: "Error from updateItem", err });
+      if (err.name === "DocumentNotFoundError") {
+        return res.status(notFound).send({ message: err.message });
+      }
+      return res
+        .status(internalServerError)
+        .send({ message: err.message, err });
     });
 };
 
@@ -46,7 +61,46 @@ const deleteItem = (req, res) => {
     .then((item) => res.status(204).send({}))
     .catch((err) => {
       console.error(err);
-      res.status(500).send({ message: "Error from updateItem", err });
+      if (err.name === "DocumentNotFoundError") {
+        return res.status(notFound).send({ message: err.message });
+      }
+      return res
+        .status(internalServerError)
+        .send({ message: err.message, err });
+    });
+};
+
+const likeItem = (req, res) => {
+  ClothingItem.findByIdAndUpdate(
+    req.params.itemId,
+    { $addToSet: { likes: req.user._id } },
+    { new: true }
+  )
+    .orFail()
+    .then((item) => res.status(200).send({ data: item }))
+    .catch((err) => {
+      console.error(err);
+      if (err.name === "DocumentNotFoundError") {
+        return res.status(notFound).send({ message: err.message });
+      }
+      return res.status(internalServerError).send({ message: err.message });
+    });
+};
+
+const dislikeItem = (req, res) => {
+  ClothingItem.findByIdAndUpdate(
+    req.params.itemId,
+    { $pull: { likes: req.user._id } },
+    { new: true }
+  )
+    .orFail()
+    .then((item) => res.status(200).send({ data: item }))
+    .catch((err) => {
+      console.error(err);
+      if (err.name === "DocumentNotFoundError") {
+        return res.status(notFound).send({ message: err.message });
+      }
+      return res.status(internalServerError).send({ message: err.message });
     });
 };
 
@@ -55,4 +109,6 @@ module.exports = {
   getItems,
   updateItem,
   deleteItem,
+  likeItem,
+  dislikeItem,
 };
