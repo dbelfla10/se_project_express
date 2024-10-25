@@ -11,7 +11,7 @@ const createItem = (req, res) => {
 
   const { name, weather, imageURL } = req.body;
 
-  ClothingItem.create({ name, weather, imageURL })
+  ClothingItem.create({ name, weather, imageURL, owner: req.user._id })
     .then((item) => {
       res.status(201).send({ data: item });
     })
@@ -22,16 +22,18 @@ const createItem = (req, res) => {
       }
       return res
         .status(internalServerError)
-        .send({ message: err.message, err });
+        .send({ message: "An error has ocurred to the server" });
     });
 };
 
 const getItems = (req, res) => {
   ClothingItem.find({})
-    .then((items) => res.status(200).send(items))
+    .then((items) => res.status(200).send({ data: items }))
     .catch((err) => {
       console.error(err);
-      res.status(internalServerError).send({ message: err.message, err });
+      return res
+        .status(internalServerError)
+        .send({ message: "An error has ocurred to the server" });
     });
 };
 
@@ -49,7 +51,7 @@ const updateItem = (req, res) => {
       }
       return res
         .status(internalServerError)
-        .send({ message: err.message, err });
+        .send({ message: "An error has ocurred to the server" });
     });
 };
 
@@ -66,7 +68,7 @@ const deleteItem = (req, res) => {
       }
       return res
         .status(internalServerError)
-        .send({ message: err.message, err });
+        .send({ message: "An error has ocurred to the server" });
     });
 };
 
@@ -83,7 +85,9 @@ const likeItem = (req, res) => {
       if (err.name === "DocumentNotFoundError") {
         return res.status(notFound).send({ message: err.message });
       }
-      return res.status(internalServerError).send({ message: err.message });
+      return res
+        .status(internalServerError)
+        .send({ message: "An error has ocurred to the server" });
     });
 };
 
@@ -100,7 +104,9 @@ const dislikeItem = (req, res) => {
       if (err.name === "DocumentNotFoundError") {
         return res.status(notFound).send({ message: err.message });
       }
-      return res.status(internalServerError).send({ message: err.message });
+      return res
+        .status(internalServerError)
+        .send({ message: "An error has ocurred to the server" });
     });
 };
 
