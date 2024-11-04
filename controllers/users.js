@@ -6,6 +6,8 @@ const {
   badRequest,
   notFound,
   internalServerError,
+  unauthorized,
+  conflict,
 } = require("../utils/errors");
 const { JWT_SECRET } = require("../utils/config");
 
@@ -25,7 +27,9 @@ const createUser = (req, res) => {
 
   return User.findOne({ email }).then((user) => {
     if (user) {
-      return res.status(409).send({ message: "This email already exists" });
+      return res
+        .status(conflict)
+        .send({ message: "This email already exists" });
     }
     return bcrypt
       .hash(req.body.password, 10)
@@ -66,7 +70,9 @@ const login = (req, res) => {
     .catch((err) => {
       console.error(err);
       if (err.message === "Incorrect email or password") {
-        return res.status(401).send({ message: "Incorrect email or password" });
+        return res
+          .status(unauthorized)
+          .send({ message: "Incorrect email or password" });
       }
       return res
         .status(internalServerError)
@@ -101,6 +107,32 @@ const getCurrentUser = (req, res) => {
     });
 };
 
+const updateUser = (req, res) => {
+  const { name, avatar } = req.body;
+
+  User.findByIdAndUpdate(
+    req.user._id,
+    { name, avatar },
+    { new: true, runValidators: true }
+  )
+    .orFail()
+    .then((user) =>
+      res.status(200).send({ name: user.name, avatar: user.avatar })
+    )
+    .catch((err) => {
+      console.error(err);
+      if (err.name === "DocumentNotFoundError") {
+        return res.status(notFound).send({ message: err.message });
+      }
+      if (err.name === "CastError") {
+        return res.status(badRequest).send({ message: err.message });
+      }
+      return res
+        .status(internalServerError)
+        .send({ message: "An error has ocurred to the server" });
+    });
+};
+
 const getUser = (req, res) => {
   const { userId } = req.params;
   User.findById(userId)
@@ -120,4 +152,4 @@ const getUser = (req, res) => {
     });
 };
 
-module.exports = { getCurrentUser, createUser, getUser, login };
+module.exports = { getCurrentUser, createUser, updateUser, login };
