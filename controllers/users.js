@@ -1,9 +1,13 @@
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
+
 const User = require("../models/user");
 const {
   badRequest,
   notFound,
   internalServerError,
 } = require("../utils/errors");
+const { JWT_SECRET } = require("../utils/config");
 
 const getUsers = (req, res) => {
   User.find({})
@@ -23,8 +27,14 @@ const createUser = (req, res) => {
     if (user) {
       return res.status(409).send({ message: "This email already exists" });
     }
-    return User.create({ name, avatar, email, password })
-      .then((user) => res.status(201).send(user))
+    return bcrypt
+      .hash(req.body.password, 10)
+      .then((hash) => User.create({ name, avatar, email, password: hash }))
+      .then((user) =>
+        res
+          .status(201)
+          .send({ name: user.name, avatar: user.avatar, email: user.email })
+      )
       .catch((err) => {
         console.error(err);
         if (err.name === "ValidationError") {
@@ -54,9 +64,40 @@ const login = (req, res) => {
       return res.status(200).send({ token });
     })
     .catch((err) => {
+      console.error(err);
       if (err.message === "Incorrect email or password") {
         return res.status(401).send({ message: "Incorrect email or password" });
       }
+      return res
+        .status(internalServerError)
+        .send({ message: "An error has ocurred to the server" });
+    });
+};
+
+const getCurrentUser = (req, res) => {
+  User.findById(req.user._id)
+    .orFail()
+    .then((user) => {
+      const { _id, email, avatar, name } = user;
+
+      res.status(200).send({
+        _id,
+        email,
+        avatar,
+        name,
+      });
+    })
+    .catch((err) => {
+      console.error(err);
+      if (err.name === "DocumentNotFoundError") {
+        return res.status(notFound).send({ message: err.message });
+      }
+      if (err.name === "CastError") {
+        return res.status(badRequest).send({ message: err.message });
+      }
+      return res
+        .status(internalServerError)
+        .send({ message: "An error has ocurred to the server" });
     });
 };
 
@@ -79,4 +120,4 @@ const getUser = (req, res) => {
     });
 };
 
-module.exports = { getUsers, createUser, getUser, login };
+module.exports = { getCurrentUser, createUser, getUser, login };
