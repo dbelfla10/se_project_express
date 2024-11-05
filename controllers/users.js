@@ -49,7 +49,7 @@ const createUser = (req, res) => {
 const login = (req, res) => {
   const { email, password } = req.body;
 
-  if (!email | !password) {
+  if (!email || !password) {
     return res
       .status(badRequest)
       .send({ message: "Email and password fields are required" });
