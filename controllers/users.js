@@ -116,6 +116,9 @@ const updateUser = (req, res) => {
     )
     .catch((err) => {
       console.error(err);
+      if (err.name === "ValidationError") {
+        return res.status(badRequest).send({ message: err.message });
+      }
       if (err.name === "DocumentNotFoundError") {
         return res.status(notFound).send({ message: err.message });
       }
