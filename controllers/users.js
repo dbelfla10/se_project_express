@@ -11,19 +11,14 @@ const {
 } = require("../utils/errors");
 const { JWT_SECRET } = require("../utils/config");
 
-const getUsers = (req, res) => {
-  User.find({})
-    .then((users) => res.status(200).send(users))
-    .catch((err) => {
-      console.error(err);
-      return res
-        .status(internalServerError)
-        .send({ message: "An error has ocurred to the server" });
-    });
-};
-
 const createUser = (req, res) => {
   const { name, avatar, email, password } = req.body;
+
+  if (!email || !password) {
+    return res
+      .status(badRequest)
+      .send({ message: "Email and password fields are required" });
+  }
 
   return User.findOne({ email }).then((user) => {
     if (user) {
@@ -54,7 +49,7 @@ const createUser = (req, res) => {
 const login = (req, res) => {
   const { email, password } = req.body;
 
-  if (!email | password) {
+  if (!email | !password) {
     return res
       .status(badRequest)
       .send({ message: "Email and password fields are required" });
@@ -119,25 +114,6 @@ const updateUser = (req, res) => {
     .then((user) =>
       res.status(200).send({ name: user.name, avatar: user.avatar })
     )
-    .catch((err) => {
-      console.error(err);
-      if (err.name === "DocumentNotFoundError") {
-        return res.status(notFound).send({ message: err.message });
-      }
-      if (err.name === "CastError") {
-        return res.status(badRequest).send({ message: err.message });
-      }
-      return res
-        .status(internalServerError)
-        .send({ message: "An error has ocurred to the server" });
-    });
-};
-
-const getUser = (req, res) => {
-  const { userId } = req.params;
-  User.findById(userId)
-    .orFail()
-    .then((user) => res.status(200).send(user))
     .catch((err) => {
       console.error(err);
       if (err.name === "DocumentNotFoundError") {

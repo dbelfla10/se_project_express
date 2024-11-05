@@ -59,9 +59,18 @@ const getItems = (req, res) => {
 const deleteItem = (req, res) => {
   const { itemId } = req.params;
 
-  ClothingItem.findByIdAndDelete(itemId)
+  ClothingItem.findById(itemId)
     .orFail()
-    .then((item) => res.status(200).send(item))
+    .then((item) => {
+      if (String(item.owner) !== req.user._id) {
+        return res.status(forbidden).send({ message: "Access is forbidden" });
+      }
+      return item
+        .deleteOne()
+        .then(() =>
+          res.status(200).send({ message: "Item successfully deleted" })
+        );
+    })
     .catch((err) => {
       console.error(err);
       if (err.name === "CastError") {
