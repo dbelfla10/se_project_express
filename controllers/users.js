@@ -20,8 +20,8 @@ const createUser = (req, res) => {
       .send({ message: "Email and password fields are required" });
   }
 
-  return User.findOne({ email }).then((user) => {
-    if (user) {
+  return User.findOne({ email }).then((existingUser) => {
+    if (existingUser) {
       return res
         .status(conflict)
         .send({ message: "This email already exists" });
