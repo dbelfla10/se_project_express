@@ -2,13 +2,6 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 
 const User = require("../models/user");
-// const {
-//   badRequest,
-//   notFound,
-//   internalServerError,
-//   unauthorized,
-//   conflict,
-// } = require("../utils/errors");
 const { JWT_SECRET } = require("../utils/config");
 
 const BadRequestError = require("../errors/BadRequestError");
@@ -21,17 +14,11 @@ const createUser = (req, res, next) => {
 
   if (!email || !password) {
     return next(new BadRequestError("Email and password fields are required"));
-    // return res
-    //   .status(badRequest)
-    //   .send({ message: "Email and password fields are required" });
   }
 
   return User.findOne({ email }).then((existingUser) => {
     if (existingUser) {
       return next(new ConflictError("This email already exists"));
-      // return res
-      //   .status(conflict)
-      //   .send({ message: "This email already exists" });
     }
     return bcrypt
       .hash(req.body.password, 10)
@@ -45,12 +32,8 @@ const createUser = (req, res, next) => {
         console.error(err);
         if (err.name === "ValidationError") {
           return next(new BadRequestError("Data is invalid"));
-          // return res.status(badRequest).send({ message: err.message });
         }
         return next(err);
-        // return res
-        //   .status(internalServerError)
-        //   .send({ message: "An error has ocurred to the server" });
       });
   });
 };
@@ -60,9 +43,6 @@ const login = (req, res, next) => {
 
   if (!email || !password) {
     return next(new BadRequestError("Email and password fields are required"));
-    // return res
-    //   .status(badRequest)
-    //   .send({ message: "Email and password fields are required" });
   }
 
   return User.findUserByCredentials(email, password)
@@ -76,14 +56,8 @@ const login = (req, res, next) => {
       console.error(err);
       if (err.message === "Incorrect email or password") {
         return next(new UnauthorizedError("Incorrect email or password"));
-        // return res
-        //   .status(unauthorized)
-        //   .send({ message: "Incorrect email or password" });
       }
       return next(err);
-      // return res
-      //   .status(internalServerError)
-      //   .send({ message: "An error has ocurred to the server" });
     });
 };
 
@@ -104,16 +78,11 @@ const getCurrentUser = (req, res, next) => {
       console.error(err);
       if (err.name === "DocumentNotFoundError") {
         return next(new NotFoundError("User was not Found"));
-        // return res.status(notFound).send({ message: err.message });
       }
       if (err.name === "CastError") {
         return next(new BadRequestError("Data is invalid"));
-        // return res.status(badRequest).send({ message: err.message });
       }
       return next(err);
-      // return res
-      //   .status(internalServerError)
-      //   .send({ message: "An error has ocurred to the server" });
     });
 };
 
@@ -133,20 +102,14 @@ const updateUser = (req, res, next) => {
       console.error(err);
       if (err.name === "ValidationError") {
         return next(new BadRequestError("Data is invalid"));
-        // return res.status(badRequest).send({ message: err.message });
       }
       if (err.name === "DocumentNotFoundError") {
         return next(new NotFoundError("User was not found"));
-        // return res.status(notFound).send({ message: err.message });
       }
       if (err.name === "CastError") {
         return next(new BadRequestError("Data is invalid"));
-        // return res.status(badRequest).send({ message: err.message });
       }
       return next(err);
-      // return res
-      //   .status(internalServerError)
-      //   .send({ message: "An error has ocurred to the server" });
     });
 };
 

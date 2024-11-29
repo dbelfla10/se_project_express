@@ -1,10 +1,4 @@
 const ClothingItem = require("../models/clothingItem");
-// const {
-//   badRequest,
-//   notFound,
-//   internalServerError,
-//   forbidden,
-// } = require("../utils/errors");
 
 const BadRequestError = require("../errors/BadRequestError");
 const ForbiddenError = require("../errors/ForbiddenError");
@@ -24,12 +18,8 @@ const createItem = (req, res, next) => {
       console.error(err);
       if (err.name === "ValidationError") {
         return next(new BadRequestError("Data is invalid"));
-        // return res.status(badRequest).send({ message: err.message });
       }
       return next(err);
-      // return res
-      //   .status(internalServerError)
-      //   .send({ message: "An error has ocurred to the server" });
     });
 };
 
@@ -39,9 +29,6 @@ const getItems = (req, res, next) => {
     .catch((err) => {
       console.error(err);
       return next(err);
-      // return res
-      //   .status(internalServerError)
-      //   .send({ message: "An error has ocurred to the server" });
     });
 };
 
@@ -71,7 +58,6 @@ const deleteItem = (req, res, next) => {
     .then((item) => {
       if (String(item.owner) !== req.user._id) {
         return next(new ForbiddenError("Access is forbidden"));
-        // return res.status(forbidden).send({ message: "Access is forbidden" });
       }
       return item
         .deleteOne()
@@ -83,16 +69,11 @@ const deleteItem = (req, res, next) => {
       console.error(err);
       if (err.name === "CastError") {
         return next(new BadRequestError("Data is invalid"));
-        // return res.status(badRequest).send({ message: err.message });
       }
       if (err.name === "DocumentNotFoundError") {
         return next(new NotFoundError("Item was not found"));
-        // return res.status(notFound).send({ message: err.message });
       }
       return next(err);
-      // return res
-      //   .status(internalServerError)
-      //   .send({ message: "An error has ocurred to the server" });
     });
 };
 
@@ -108,16 +89,11 @@ const likeItem = (req, res, next) => {
       console.error(err);
       if (err.name === "CastError") {
         return next(new BadRequestError("Data is invalid"));
-        // return res.status(badRequest).send({ message: err.message });
       }
       if (err.name === "DocumentNotFoundError") {
         return next(new NotFoundError("Item was not found"));
-        // return res.status(notFound).send({ message: err.message });
       }
       return next(err);
-      // return res
-      //   .status(internalServerError)
-      //   .send({ message: "An error has ocurred to the server" });
     });
 };
 
@@ -133,16 +109,11 @@ const dislikeItem = (req, res, next) => {
       console.error(err);
       if (err.name === "CastError") {
         return next(new BadRequestError(err.message));
-        // return res.status(badRequest).send({ message: err.message });
       }
       if (err.name === "DocumentNotFoundError") {
         return next(new NotFoundError(err.message));
-        // return res.status(notFound).send({ message: err.message });
       }
       return next(err);
-      // return res
-      //   .status(internalServerError)
-      //   .send({ message: "An error has ocurred to the server" });
     });
 };
 
