@@ -12,7 +12,7 @@ router.post("/signup", validateUserBody, createUser);
 router.use("/users", userRouter);
 router.use("/items", clothingItemRouter);
 
-router.use((req, res) => {
+router.use((req, res, next) => {
   return next(new NotFoundError("Requested resource not found"));
 });
 
