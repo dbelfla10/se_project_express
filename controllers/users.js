@@ -34,7 +34,8 @@ const createUser = (req, res, next) => {
           return next(new BadRequestError("Data is invalid"));
         }
         return next(err);
-      });
+      })
+      .catch(next);
   });
 };
 

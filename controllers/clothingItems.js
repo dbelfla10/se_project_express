@@ -32,24 +32,6 @@ const getItems = (req, res, next) => {
     });
 };
 
-// const updateItem = (req, res) => {
-//   const { itemId } = req.params;
-//   const { imageURL } = req.body;
-
-//   ClothingItem.findByIdAndUpdate(itemId, { $set: { imageURL } })
-//     .orFail()
-//     .then((item) => res.status(200).send({ data: item }))
-//     .catch((err) => {
-//       console.error(err);
-//       if (err.name === "DocumentNotFoundError") {
-//         return res.status(notFound).send({ message: err.message });
-//       }
-//       return res
-//         .status(internalServerError)
-//         .send({ message: "An error has ocurred to the server" });
-//     });
-// };
-
 const deleteItem = (req, res, next) => {
   const { itemId } = req.params;
 
@@ -120,7 +102,6 @@ const dislikeItem = (req, res, next) => {
 module.exports = {
   createItem,
   getItems,
-  // updateItem,
   deleteItem,
   likeItem,
   dislikeItem,
